@@ -1,0 +1,73 @@
+#!/bin/bash
+ # Collect the current user's ssh and enable passwords
+ echo -n "Enter the SSH password for $(whoami) "
+ read -s -e password
+ echo -ne '\n'
+ echo -n "Enter the Enable password for $(whoami) "
+ read -s -e enable
+ echo -ne '\n'
+# Feed the expect script a device list & the collected passwords
+
+#execute the command on distro
+for device in `cat ~/srx/devices.txt`; do
+ ./cmd_exp.exp $device $password $enable ;
+done
+[vijay.emarose@cbast2 srx]$ cat cmd_exp.exp
+#!/usr/bin/expect -f
+
+# Set variables
+ set hostname [lindex $argv 0]
+ set username $env(USER)
+ set password [lindex $argv 1]
+ set enablepassword [lindex $argv 2]
+
+# Log results
+
+set systemTime [clock seconds]
+set time [clock format $systemTime -format %a_%b_%d_%Y@%H-%M-%S]
+log_file -a ~/srx/log/SRX_$time.log
+
+# Announce which device we are working on and at what time
+ send_user "\n"
+ send_user ">>>>>  Working on $hostname @ [exec date] <<<<<\n"
+ send_user "\n"
+
+# SSH
+spawn ssh $hostname
+expect {
+
+"no)? " {
+send "yes\n"
+expect "*assword: "
+send "$password\r"
+}
+
+"*assword: " {
+send "$password\n"
+}
+}
+
+expect "*>"
+
+send "set cli screen-length 0\n"
+expect "*>"
+send "show system uptime\n"
+expect "*>"
+send "show chassis routing-engine\n"
+expect "*>"
+send "show interfaces reth0 statistics\n"
+expect "*>"
+send "show security monitoring fpc 0 node 0\n"
+expect "*>"
+send "show security monitoring fpc 1 node 0\n"
+expect "*>"
+send "show security monitoring fpc 2 node 0\n"
+expect "*>"
+send "show security monitoring fpc 4 node 0\n"
+expect "*>"
+send "show system statistics\n"
+expect "*>"
+
+send "exit\n"
+expect ":~\$"
+exit
