@@ -7,10 +7,9 @@
  set enablepassword [lindex $argv 2]
 
 # Log results
-
 set systemTime [clock seconds]
 set time [clock format $systemTime -format %a_%b_%d_%Y@%H-%M-%S]
-log_file -a ~/srx/log/SRX_$time.log
+log_file -a ~/srx/log/FO_SRX_$time.log
 
 # Announce which device we are working on and at what time
  send_user "\n"
@@ -41,18 +40,40 @@ expect "*>"
 send "show chassis routing-engine\n"
 expect "*>"
 send "show interfaces reth0 statistics\n"
+sleep 1
 expect "*>"
-send "show security monitoring fpc 0 node 0\n"
+send "show security monitoring fpc node all 0\n"
 expect "*>"
-send "show security monitoring fpc 1 node 0\n"
+send "show security monitoring fpc node all 1\n"
 expect "*>"
-send "show security monitoring fpc 2 node 0\n"
+send "show security monitoring fpc node all 2\n"
 expect "*>"
-send "show security monitoring fpc 4 node 0\n"
+send "show security monitoring fpc node all 4\n"
+expect "*>"
+send "show security monitoring fpc node all 7\n"
+expect "*>"
+send "show security monitoring fpc node all 8\n"
 expect "*>"
 send "show system statistics\n"
+sleep 1
 expect "*>"
-
+send "show chassis fpc\n"
+expect "*>"
+send "show security monitoring\n"
+sleep 1
+expect "*>"
+send "show security monitoring performance spu\n"
+sleep 1
+expect "*>"
+send "show security flow statistics node 0\n"
+expect "*>"
+send "show chassis cluster status\n"
+expect "*>"
+send "show chassis cluster information\n"
+expect "*>"
+send "show chassis cluster interfaces\n"
+expect "*>"
+send "show config\n"
 send "exit\n"
 expect ":~\$"
 exit
